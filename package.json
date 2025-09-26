@@ -1,16 +1,17 @@
 {
   "name": "discord-multi-bot",
   "version": "1.0.0",
-  "description": "Projeto para rodar múltiplos bots Discord com Eris no Glitch",
+  "description": "Projeto para rodar múltiplos bots Discord com Eris e @discordjs/voice",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "eris": "^0.17.1"
+    "eris": "^0.19.1",
+    "@discordjs/voice": "^0.15.1"
   },
   "engines": {
-    "node": "14.x"
+    "node": "18.x"
   },
   "author": "",
   "license": "MIT"
