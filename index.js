@@ -1,22 +1,18 @@
-// index.js
-const Eris = require("eris");
-const { joinVoiceChannel } = require("@discordjs/voice");
-const startServer = require("./keep_alive.js");
+const { Client, GatewayIntentBits } = require('discord.js');
+const { joinVoiceChannel } = require('@discordjs/voice');
+const startServer = require('./keep_alive');
 
 // Inicia servidor HTTP para manter vivo
 startServer();
 
-// ID do servidor
-const GUILD_ID = process.env.GUILD_ID;
-
-// Lista de canais de voz (3 canais, pois você tem 15 tokens = 5 bots por canal)
+// IDs dos canais de voz
 const VOICE_CHANNELS = [
   process.env.CHANNEL1,
   process.env.CHANNEL2,
   process.env.CHANNEL3,
 ];
 
-// Lista de tokens (15 bots)
+// Lista de tokens
 const tokens = [
   process.env.TOKEN1,
   process.env.TOKEN2,
@@ -35,44 +31,44 @@ const tokens = [
   process.env.TOKEN15,
 ];
 
-const bots = [];
-
 tokens.forEach((token, index) => {
   if (!token) {
     console.error(`❌ Token ${index + 1} não definido.`);
     return;
   }
 
-  const bot = new Eris(token, {
-    intents: ["guilds", "guildVoiceStates"],
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildVoiceStates
+    ]
   });
 
-  bot.on("ready", () => {
-    console.log(`✅ Bot ${index + 1} logado como ${bot.user.username}`);
+  client.once('ready', () => {
+    console.log(`✅ Bot ${index + 1} logado como ${client.user.tag}`);
 
-    // Calcula em qual canal de voz o bot vai entrar
-    const channelIndex = Math.floor(index / 5); // 5 bots por canal
+    // Calcula o canal para o bot entrar (5 bots por canal)
+    const channelIndex = Math.floor(index / 5);
     const channelId = VOICE_CHANNELS[channelIndex % VOICE_CHANNELS.length];
 
     try {
       joinVoiceChannel({
         channelId: channelId,
-        guildId: GUILD_ID,
-        adapterCreator: bot.guilds.get(GUILD_ID).voiceAdapterCreator,
+        guildId: process.env.GUILD_ID,
+        adapterCreator: client.guilds.cache.get(process.env.GUILD_ID).voiceAdapterCreator,
         selfDeaf: true,
         selfMute: true,
       });
 
       console.log(`🎤 Bot ${index + 1} entrou no canal ${channelId}`);
     } catch (err) {
-      console.error(`❌ Erro ao conectar bot ${index + 1} na call:`, err);
+      console.error(`❌ Erro ao conectar bot ${index + 1}:`, err);
     }
   });
 
-  bot.on("error", (err) => {
+  client.on('error', (err) => {
     console.error(`Erro no bot ${index + 1}:`, err);
   });
 
-  bot.connect();
-  bots.push(bot);
+  client.login(token);
 });
